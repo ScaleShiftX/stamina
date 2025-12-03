@@ -4,7 +4,10 @@ A game made on-stream, in one stream!
 ## Control Binds
 | Bind  | Action |
 | ---- | ---- |
-| TBD  | TBD  |
+| Menu  | Esc  |
+| Move  | WASD  |
+| Jump  | Space  |
+| Respawn  | R  |
 
 ## Troubleshooting
 

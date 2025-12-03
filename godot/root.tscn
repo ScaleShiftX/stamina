@@ -1,9 +1,16 @@
-[gd_scene load_steps=10 format=4 uid="uid://dpi1smxtsa8sl"]
+[gd_scene load_steps=16 format=4 uid="uid://dpi1smxtsa8sl"]
 
 [ext_resource type="Script" uid="uid://jc45aoq0wpm6" path="res://Hud.cs" id="1_28aoi"]
-[ext_resource type="Material" uid="uid://rtespn3fdrx2" path="res://ground/ground.tres" id="1_pq8q7"]
+[ext_resource type="Material" uid="uid://rtespn3fdrx2" path="res://ground/ground_material.tres" id="1_pq8q7"]
 [ext_resource type="Script" uid="uid://bwgpw3grn64r6" path="res://Menu.cs" id="2_jnlp7"]
 [ext_resource type="Script" uid="uid://bcvb3fjq3rml1" path="res://player/CharacterController.cs" id="2_pyidc"]
+[ext_resource type="Material" uid="uid://dsj1hesag45wu" path="res://lava/lava_material.tres" id="3_vyht1"]
+[ext_resource type="PhysicsMaterial" uid="uid://bkhqab8yif67h" path="res://player/player_physics_material.tres" id="4_jnlp7"]
+[ext_resource type="PackedScene" uid="uid://ddicl014uv80n" path="res://player/player.blend" id="6_l8v81"]
+[ext_resource type="Material" uid="uid://0ii4qyuo5xul" path="res://metal/metal_material.tres" id="7_bf3um"]
+
+[sub_resource type="Environment" id="Environment_bf3um"]
+background_mode = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_semd7"]
 resource_name = "Material"
@@ -48,7 +55,10 @@ shadow_mesh = SubResource("ArrayMesh_r31di")
 [sub_resource type="BoxShape3D" id="BoxShape3D_pyidc"]
 size = Vector3(100, 1, 100)
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pyidc"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_28aoi"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bf3um"]
+size = Vector3(1, 0.124939, 1)
 
 [node name="Root" type="Node3D"]
 
@@ -60,22 +70,32 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="LabelWin" type="Label" parent="UI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "You win!!! WOWWWIEEE :3"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="HUD" type="Control" parent="UI" node_paths=PackedStringArray("labelFPS")]
+layout_mode = 1
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
 script = ExtResource("1_28aoi")
 labelFPS = NodePath("Statistics/VBoxContainer/FPS")
 
 [node name="Statistics" type="Control" parent="UI/HUD"]
 layout_mode = 1
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="UI/HUD/Statistics"]
 layout_mode = 0
 offset_right = 1.0
+offset_bottom = 239.0
 
 [node name="FPS" type="Label" parent="UI/HUD/Statistics/VBoxContainer"]
 layout_mode = 2
@@ -103,6 +123,8 @@ layout_mode = 2
 
 [node name="Diagnostic8" type="Label" parent="UI/HUD/Statistics/VBoxContainer"]
 layout_mode = 2
+
+[node name="Node" type="Node" parent="UI/HUD/Statistics/VBoxContainer"]
 
 [node name="Menu" type="Control" parent="UI"]
 visible = false
@@ -134,10 +156,16 @@ text = "Menu"
 layout_mode = 2
 text = "Quit"
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.656164, 0.754618, 0, -0.754618, 0.656164, 0, 22, -8.24421)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_bf3um")
+
 [node name="Ground" type="StaticBody3D" parent="."]
 
 [node name="Model" type="MeshInstance3D" parent="Ground"]
-material_override = ExtResource("1_pq8q7")
+material_override = ExtResource("3_vyht1")
 mesh = SubResource("ArrayMesh_0ofhd")
 skeleton = NodePath("")
 
@@ -145,56 +173,175 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_pyidc")
 
-[node name="Player" type="Node3D" parent="."]
+[node name="OmniLight3D" type="OmniLight3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.01603, 0, -7.25438)
 
-[node name="CharacterController" type="RigidBody3D" parent="Player" node_paths=PackedStringArray("_diagnosticsVBoxContainer", "_diagnosticsCsgVector", "_diagnosticsCsgRotation", "_cameraPlayerPivot")]
+[node name="Player" type="Node" parent="."]
+
+[node name="CharacterController" type="RigidBody3D" parent="Player" node_paths=PackedStringArray("_diagnosticsVBoxContainer", "_diagnosticsCsgVector", "_cameraPlayerPivot", "_labelWin")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, -32)
 axis_lock_angular_x = true
 axis_lock_angular_y = true
 axis_lock_angular_z = true
+physics_material_override = ExtResource("4_jnlp7")
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 1000
 script = ExtResource("2_pyidc")
 _diagnosticsVBoxContainer = NodePath("../../UI/HUD/Statistics/VBoxContainer")
 _diagnosticsCsgVector = NodePath("DiagnosticsVector")
-_diagnosticsCsgRotation = NodePath("Diagnostics Rotation")
 _cameraPlayerPivot = NodePath("PlayerCameraPivot")
+_labelWin = NodePath("../../UI/LabelWin")
 
-[node name="Model" type="CSGCylinder3D" parent="Player/CharacterController"]
+[node name="player" parent="Player/CharacterController" instance=ExtResource("6_l8v81")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="CSGModel" type="CSGCylinder3D" parent="Player/CharacterController"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+visible = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player/CharacterController"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-shape = SubResource("CapsuleShape3D_pyidc")
+shape = SubResource("CapsuleShape3D_28aoi")
 
 [node name="PlayerCameraPivot" type="Node3D" parent="Player/CharacterController"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.53047, 0)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1.53047, 0)
 
 [node name="PlayerCamera" type="Camera3D" parent="Player/CharacterController/PlayerCameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.962223, 0.272263, 0, -0.272263, 0.962223, 0, 2.22572, 3.59516)
+fov = 90.0
 
 [node name="DiagnosticsVector" type="CSGBox3D" parent="Player/CharacterController"]
+visible = false
 
-[node name="Diagnostics Rotation" type="CSGBox3D" parent="Player/CharacterController"]
+[node name="Boxes" type="Node" parent="."]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.656164, 0.754618, 0, -0.754618, 0.656164, 0, 22, -8.24421)
-
-[node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0123, 1.97946, 5.52471)
+[node name="CSGBox3D" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -31.9891)
+material_override = ExtResource("7_bf3um")
 use_collision = true
-size = Vector3(5.10132, 3.95892, 4.75684)
+size = Vector3(5, 5, 5)
 
-[node name="CSGBox3DRamp" type="CSGBox3D" parent="."]
-transform = Transform3D(0.705414, -0.708796, 0, 0.708796, 0.705414, 0, 0, 0, 1, 0.142162, -2.17248, 5.52471)
+[node name="CSGBox3D2" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.91863, -18.0353)
+material_override = ExtResource("7_bf3um")
 use_collision = true
-size = Vector3(13.8153, 3.95892, 4.75684)
+size = Vector3(5, 5, 23.2359)
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5637, 1.97946, 10.8126)
+[node name="CSGBox3D3" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 6.0683, -20)
+material_override = ExtResource("7_bf3um")
 use_collision = true
-size = Vector3(5.10132, 3.95892, 4.75684)
+size = Vector3(5, 12.1366, 15)
 
-[node name="CSGBox3D2Ramp" type="CSGBox3D" parent="."]
-transform = Transform3D(0.390651, -0.920539, 0, 0.920539, 0.390651, 0, 0, 0, 1, -1.1471, -2.12153, 10.8126)
+[node name="CSGBox3D4" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 4.80029, -15)
+material_override = ExtResource("7_bf3um")
 use_collision = true
-size = Vector3(5.10132, 19.7954, 4.75684)
+size = Vector3(5, 9.60059, 15)
+
+[node name="CSGFinishLine" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 43.534)
+material_override = ExtResource("1_pq8q7")
+use_collision = true
+size = Vector3(5, 5, 5)
+
+[node name="Area3D" type="Area3D" parent="Boxes/CSGFinishLine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.61769, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boxes/CSGFinishLine/Area3D"]
+transform = Transform3D(4.91, 0, 0, 0, 4.91, 0, 0, 0, 4.91, 0, 0.225758, 0)
+shape = SubResource("BoxShape3D_bf3um")
+
+[node name="CSGFinishLineLining" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1.035, 0, 0, 0, 1.035, 0, 0, 0, 1.035, 0, 2.37396, 43.534)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(5, 4.74792, 5)
+
+[node name="CSGBox3D5" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42859, -3.56477)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D6" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.69909, 2.19484, 0.132887)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D7" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.06495, 3.11096, 3.88755)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D8" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.52148, 2.49178, -0.163802)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D9" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.54102, 3.1297, 4.68407)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D10" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.72509, 2.19484, 10.4105)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D11" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.22086, 2.19484, 13.4435)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D12" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51085, 3.33477, 14.4468)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D13" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.22086, 3.05654, 18.4453)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="CSGBox3D14" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.51085, 3.33477, 18.1717)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
+
+[node name="Ramp" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 4.14032, 20.5413)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(11, 1, 3)
+
+[node name="Platform" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 5.06104, 25.0264)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(11, 1, 7.56402)
+
+[node name="CSGBox3D15" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -2.44895e-07, 5.91587, 33.0619)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 2.71826, 8.60254)
+
+[node name="CSGBox3D16" type="CSGBox3D" parent="Boxes"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 7.915, 26.2246)
+material_override = ExtResource("7_bf3um")
+use_collision = true
+size = Vector3(3, 1, 3)
 
 [connection signal="pressed" from="UI/Menu/VBoxContainer/Button" to="UI/Menu" method="OnButtonQuitPressed"]
+[connection signal="body_entered" from="Boxes/CSGFinishLine/Area3D" to="Player/CharacterController" method="WinAreaOnBodyEntered"]

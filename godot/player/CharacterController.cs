@@ -7,7 +7,7 @@ public partial class CharacterController : RigidBody3D
     //DIAGNOSTICS
     [Export] private VBoxContainer _diagnosticsVBoxContainer;
     [Export] private CsgBox3D _diagnosticsCsgVector;
-    [Export] private CsgBox3D _diagnosticsCsgRotation;
+    //[Export] private CsgBox3D _diagnosticsCsgRotation;
 
     //ANIMATION
     private Vector3 _animationNormal = Vector3.Forward;
@@ -15,6 +15,11 @@ public partial class CharacterController : RigidBody3D
     //LOOK
     [Export] private Node3D _cameraPlayerPivot;
     private float _mouseSensitivity = 0.00075f;
+
+    //STATES
+    private bool _isAlive = true;
+    private Vector3 _startPosition = Vector3.Zero; //overwritten in Ready()
+    [Export] private Label _labelWin;
 
     //MOVEMENT
     //Surface
@@ -38,7 +43,7 @@ public partial class CharacterController : RigidBody3D
     private Vector3 _thrustDirection = Vector3.Zero;
     private const float ThrustMagnitude = 150f; //250f;
     private const float ThrustMagnitudeOnFlatCoefficient = 1f;
-    private const float ThrustMagnitudeOnSlopeCoefficient = 1f;
+    private const float ThrustMagnitudeOnSlopeCoefficient = 0.002f;//1f;
     private const float ThrustMagnitudeInAirCoefficient = 0.002f;
     private const float ThrustMagnitudeCrouchedCoefficient = 0.05f;
 
@@ -53,12 +58,17 @@ public partial class CharacterController : RigidBody3D
     private const float DragOnFlatCoefficient = 1f;
     private const float DragOnSlopeAndWishingIntoCoefficient = 0.25f; //deprecated - was for wall-climbing
     private const float DragOnSlopeCoefficient = 0.01f;
-    private const float DragInAirCoefficient = 0f; //0.01f;
+    private const float DragInAirCoefficient = 0.01f; //0f; //0.01f;
     private const float DragSlideCoefficient = 0.05f;
     private const float DragOnFlatStatic = 0.8f; //the speed below which the player's friction will be raised to very high levels to stop them from slipping,
                                                  //as long as they are on a flat and aren't trying to thrust
                                                  //0.68f was the last measured slipping speed when standing on something that's barely a flat rather than a slope
-    
+
+    public override void _Ready()
+    {
+        _startPosition = GlobalPosition;
+    }
+
     public override void _Input(InputEvent @event)
     {
         //Look
@@ -92,24 +102,91 @@ public partial class CharacterController : RigidBody3D
         _diagnosticsCsgVector.GlobalPosition = GlobalPosition + (_thrustDirection * 3f);
 
 
-        //Labels
-        Label diagnosticsLabel1 = _diagnosticsVBoxContainer.GetChild<Label>(1);
-        if (_surfaceOn == Surface.Flat)
+        ////Labels
+        //Label diagnosticsLabel1 = _diagnosticsVBoxContainer.GetChild<Label>(1);
+        //if (_surfaceOn == Surface.Flat)
+        //{
+        //    diagnosticsLabel1.Text = "Surface on: Flat";
+        //}
+        //else if (_surfaceOn == Surface.Slope)
+        //{
+        //    diagnosticsLabel1.Text = "Surface on: Slope";
+        //}
+        //else //if (_surfaceOn == Surface.Air)
+        //{
+        //    diagnosticsLabel1.Text = "Surface on: Air";
+        //}
+        //
+        //_diagnosticsVBoxContainer.GetChild<Label>(2).Text = $"_surfaceWishingIntoNormal: {_surfaceWishingIntoNormal}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(3).Text = $"_thrustDirection: {_thrustDirection}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(4).Text = $"_animationNormal: {_animationNormal}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(5).Text = $"y: {GlobalPosition.Y}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(6).Text = $"GlobalRotation.X: {GlobalRotation.X}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(7).Text = $"GlobalRotation.Y: {GlobalRotation.Y}";
+        //_diagnosticsVBoxContainer.GetChild<Label>(8).Text = $"GlobalRotation.Z: {GlobalRotation.Z}";
+    }
+
+    public override void _PhysicsProcess(double deltaDouble)
+    {
+        float delta = (float)deltaDouble;
+
+        //Die
+        if (GlobalPosition.Y <= 0f && _isAlive)
         {
-            diagnosticsLabel1.Text = "Surface on: Flat";
-        }
-        else if (_surfaceOn == Surface.Slope)
-        {
-            diagnosticsLabel1.Text = "Surface on: Slope";
-        }
-        else //if (_surfaceOn == Surface.Air)
-        {
-            diagnosticsLabel1.Text = "Surface on: Air";
+            SetPlayerAliveState(false);
         }
 
-        _diagnosticsVBoxContainer.GetChild<Label>(2).Text = $"_surfaceWishingIntoNormal: {_surfaceWishingIntoNormal}";
-        _diagnosticsVBoxContainer.GetChild<Label>(3).Text = $"_thrustDirection: {_thrustDirection}";
-        _diagnosticsVBoxContainer.GetChild<Label>(4).Text = $"_animationNormal: {_animationNormal}";
+        //Respawn
+        if (Input.IsActionJustPressed("respawn"))
+        {
+            SetPlayerAliveState(true);
+        }
+    }
+
+    private void SetPlayerAliveState(bool isAlive)
+    {
+        //Respawn
+        if (isAlive)
+        {
+            GlobalPosition = _startPosition;
+        }
+        
+        //Flag as dead
+        _isAlive = isAlive;
+
+        //Unlock rolling
+        AxisLockAngularX = isAlive;
+        AxisLockAngularY = isAlive;
+        AxisLockAngularZ = isAlive;
+        if (isAlive)
+        {
+            AngularVelocity = Vector3.Zero;
+            GlobalRotation = Vector3.Zero;
+        }
+
+        //Impulse
+        if (!isAlive)
+        {
+            RandomNumberGenerator rng = new();
+            float angleRad = rng.RandfRange(0f, Mathf.Tau);
+            Vector3 direction = new Vector3(Mathf.Cos(angleRad), 0f, Mathf.Sin(angleRad));
+            AngularVelocity += direction * 1f;
+        }
+
+        //Win state
+        SetWinState(false);
+    }
+
+    private void SetWinState(bool isWin)
+    {
+        _labelWin.Visible = isWin;
+    }
+
+    public void WinAreaOnBodyEntered(Node3D body)
+    {
+        GD.Print($"Body {body} entered");
+
+        SetWinState(true);
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state)
@@ -150,7 +227,7 @@ public partial class CharacterController : RigidBody3D
         }
 
         //Jump
-        if (Input.IsActionPressed("move_jump") && !_isJumpedAndStillOnSurface //wish
+        if (_isAlive && Input.IsActionPressed("move_jump") && !_isJumpedAndStillOnSurface //wish
             && (
                 (_surfaceOn == Surface.Flat) //flat
                 || (true //SlopeMovementTimeRemaining > 0f //slope //deprecated
@@ -186,8 +263,6 @@ public partial class CharacterController : RigidBody3D
 
                 //Impulse
                 LinearVelocity += jumpDirection * JumpVSpeed;
-
-                GD.Print("Jump!");
             }
             else
             {
@@ -203,7 +278,12 @@ public partial class CharacterController : RigidBody3D
 
     private void UpdateThrustDirection(PhysicsDirectBodyState3D state)
     {
-        Vector3 wishDirectionRaw = GetWishDirectionRaw();
+        Vector3 wishDirectionRaw = Vector3.Zero;
+        if (_isAlive)
+        {
+            wishDirectionRaw = GetWishDirectionRaw();
+        }
+        
         Vector3 wishDirectionTangentToUp = (wishDirectionRaw - (Vector3.Up * wishDirectionRaw.Dot(Vector3.Up))).Normalized();
 
         UpdateCollisionDetection(state, wishDirectionTangentToUp);

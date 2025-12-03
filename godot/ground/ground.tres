@@ -1,0 +1,27 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://rtespn3fdrx2"]
+
+[ext_resource type="Shader" uid="uid://drqwrapnqb7ms" path="res://ground/ground.gdshader" id="1_ellb5"]
+[ext_resource type="Texture2D" uid="uid://bvbg38aa2vkna" path="res://ground/Ground003_4K-PNG_Color.png" id="2_jiioo"]
+[ext_resource type="Texture2D" uid="uid://ngedpu4a02o1" path="res://ground/Ground003_4K-PNG_Roughness.png" id="3_vrxmo"]
+[ext_resource type="Texture2D" uid="uid://c8h2skiqta3d8" path="res://ground/Ground003_4K-PNG_Displacement.png" id="4_u86my"]
+[ext_resource type="Texture2D" uid="uid://ejramcvbus50" path="res://ground/Ground003_4K-PNG_NormalGL.png" id="5_07fn2"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ellb5")
+shader_parameter/scale_uv = 7.865
+shader_parameter/offset_uv = Vector2(0, 0)
+shader_parameter/is_albedo = true
+shader_parameter/texture_albedo = ExtResource("2_jiioo")
+shader_parameter/is_displacement = false
+shader_parameter/texture_displacement = ExtResource("4_u86my")
+shader_parameter/scale_displacement = 33.35
+shader_parameter/is_normal = true
+shader_parameter/scale_normal = 1.0
+shader_parameter/texture_normal = ExtResource("5_07fn2")
+shader_parameter/is_ao = false
+shader_parameter/scale_ao = 1.0
+shader_parameter/texture_ao = ExtResource("3_vrxmo")
+shader_parameter/is_roughness = true
+shader_parameter/scale_roughness = 1.0
+shader_parameter/texture_roughness = ExtResource("3_vrxmo")

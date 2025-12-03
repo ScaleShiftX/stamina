@@ -15,10 +15,10 @@ A game made on-stream, in one stream!
 AMD's 25.8.1 driver has critical errors in it which causes it to fail to load some games, including Godot games. The below issue describes it. Interestingly, this is not the first time AMD has done this.
 https://github.com/godotengine/godot/issues/109378
 
-Don't worry though, because you can simply revert to a previous driver version and still run Blemo just fine.
+Don't worry though, because you can simply revert to a previous driver version and still run the game just fine.
 Download a different driver here: <https://www.amd.com/en/support/download/drivers.html>
 
-If you don't want to download a different driver version, you can alternatively launch Blemo with a different driver altogether. Here's how to do that on Windows:
+If you don't want to download a different driver version, you can alternatively launch the game with a different driver altogether. Here's how to do that on Windows:
 
 - 1.) Open cmd (NOT POWERSHELL) by typing `cmd` into your search bar and clicking on it
 - 2.) Right-click on the executable and select Properties
@@ -27,7 +27,7 @@ If you don't want to download a different driver version, you can alternatively 
 - 5.) Enter the executable file, add a space, and add `--help`
 - 6.) Look through the list that prints out until you find the `Run options` section. Then look for the `--display-driver <driver>` command. Then look beside it to the right for its description which will have a bunch of different `display driver` options. Copy the text of whichever one you want to try - I recommend `opengl3` if you have it (Vulkan is my first choice but that not working with AMD is why we're here).
 - 7.) PRESS ENTER TO EXIT OUT OF THE HELP SECTION
-- 8.) Type the executable name, space, and then the driver argument you chose. Ex: `godot.exe --rendering-driver opengl3` or `godot.exe --rendering-driver d3d12`. Be careful to type rendering driver here, not display driver. This will launch Blemo!
+- 8.) Type the executable name, space, and then the driver argument you chose. Ex: `godot.exe --rendering-driver opengl3` or `godot.exe --rendering-driver d3d12`. Be careful to type rendering driver here, not display driver. This will launch the game!
 Note that it may take longer than usual to launch this way
 
 ### Sound Driver Issue? (Sound is Crackling)
